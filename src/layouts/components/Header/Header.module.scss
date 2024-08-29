@@ -1,0 +1,35 @@
+:root {
+  --width-logo-menu: 50px;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+  max-width: var(--max-width-layout);
+  margin: 0 auto;
+  padding: 15px;
+}
+
+.logo{
+    flex: 1;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  flex: 4;
+}
+
+.logo img {
+  width: var(--width-logo-menu);
+  height: var(--width-logo-menu);
+}
+
+.actions{
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}

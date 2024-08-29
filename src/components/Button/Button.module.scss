@@ -1,0 +1,40 @@
+:root {
+  --color-hover-button: var(--color-white);
+}
+
+.btn-menu {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.8rem;
+  cursor: pointer;
+  background-color: transparent;
+}
+
+.typeIcon {
+  color: var(--color-primary);
+  transition: all linear 0.1s;
+
+  &:hover {
+    color: var(--color-hover-button);
+  }
+}
+
+.typeLogo {
+  gap: 5px;
+  color: var(--color-white);
+  font-size: 3rem;
+  font-style: italic;
+}
+
+.typeText{
+  background-color: transparent;
+  transition: all 0.05s linear;
+  padding: 0 10px;
+  color: var(--color-text);
+  font-size: 1.4rem;
+
+  &:hover{
+    color: white;
+  }
+}

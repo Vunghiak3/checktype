@@ -1,0 +1,130 @@
+:root {
+  --background-color-bar: #263041;
+  --space-options: 40px;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  gap: 70px;
+  max-width: var(--max-width-layout);
+  margin: 0 auto;
+  padding: 15px;
+}
+
+.function-bar {
+  background-color: var(--background-color-bar);
+  display: flex;
+  padding: 10px 30px;
+  margin: 0 auto;
+  border-radius: 10px;
+  gap: var(--space-options);
+}
+
+.function-bar-item {
+  display: flex;
+  position: relative;
+  font-size: 1.4rem;
+  user-select: none;
+}
+
+.function-bar-item.mode {
+  &::after {
+    content: "";
+    width: 5px;
+    height: 100%;
+    background-color: var(--background-color-primary);
+    border-radius: 10px;
+    position: absolute;
+    right: calc(var(--space-options) / -2);
+  }
+  &::before {
+    content: "";
+    width: 5px;
+    height: 100%;
+    background-color: var(--background-color-primary);
+    border-radius: 10px;
+    position: absolute;
+    left: calc(var(--space-options) / -2);
+  }
+}
+
+.content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 30px;
+  position: relative;
+}
+
+.words-wrapper {
+  color: var(--color-text);
+  flex-wrap: wrap;
+  font-size: 2rem;
+  word-spacing: 10px;
+  display: flex;
+  gap: 10px;
+  height: 110px;
+  overflow: auto;
+}
+
+.word {
+  user-select: none;
+}
+
+.timer {
+  position: absolute;
+  top: -40px;
+  user-select: none;
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 20px;
+  max-width: 700px;
+  width: 100%;
+  padding: 10px;
+}
+
+.input {
+  width: 100%;
+  font-size: 1.8rem;
+  padding: 10px 10px;
+  border-radius: 5px;
+}
+
+.btn-reload {
+  padding: 0 10px;
+}
+
+.correct {
+  color: green;
+}
+
+.incorrect {
+  color: red;
+}
+
+.highlightCorrect {
+  color: green;
+  background-color: #263041;
+}
+
+.highlighIncorrect {
+  color: red;
+  background-color: #263041;
+}
+
+.highlight {
+  background-color: #263041;
+}
+
+.selected {
+  color: var(--color-primary);
+}
+
+.hidden{
+  opacity: 0;
+}
