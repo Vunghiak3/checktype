@@ -9,14 +9,14 @@ export const dataFuction = [
   {
     mode: "time",
     icon: faClock,
-    type: [
+    level: [
       {
         icon: faAt,
-        data: "punctuation",
+        text: "punctuation",
       },
       {
         icon: faHashtag,
-        data: "number",
+        text: "number",
       },
     ],
     time: [15, 30, 60, 120],
@@ -24,16 +24,16 @@ export const dataFuction = [
   {
     mode: "words",
     icon: faA,
-    type: [
+    level: [
       {
         icon: faAt,
-        data: "punctuation",
+        text: "punctuation",
       },
       {
         icon: faHashtag,
-        data: "word",
+        text: "word",
       },
     ],
-    countWord: [10, 25, 50, 70],
+    lengthWord: [10, 25, 50, 70],
   },
 ];

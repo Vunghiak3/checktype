@@ -1,84 +1,57 @@
 import classNames from "classnames/bind";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleRight, faRotateRight } from "@fortawesome/free-solid-svg-icons";
-import { useEffect, useRef, useState } from "react";
 
 import Button from "~/components/Button";
 import styles from "./Home.module.scss";
 import dataWords from "~/assets/words/words.json";
 import { dataFuction } from "./dataFuction";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import FunctionBar from "~/components/FuctionBar/FunctionBar";
+import { faRotateLeft } from "@fortawesome/free-solid-svg-icons";
 
 const cx = classNames.bind(styles);
 
 function Home() {
   const [currentFunction, setCurrentFunction] = useState(dataFuction[0]);
-  const [time, setTime] = useState(dataFuction[0].time[0]);
-  const [selected, setSelected] = useState({
-    type: null,
-    mode: currentFunction.mode,
-    time: time,
-    countWord: dataFuction[1].countWord[0],
-  });
   const [words, setWords] = useState([]);
-  const [lengthwords, setLengthWords] = useState(30);
-  const [input, setInput] = useState("");
-  const inputRef = useRef();
   const [pos, setPos] = useState(0);
-  const [isActive, setIsActive] = useState(false);
-  const [result, setResult] = useState(null);
   const [wordCorrect, setWordCorrect] = useState(0);
+  const [valueInput, setValueInput] = useState("");
+  const [timer, setTimer] = useState(dataFuction[0].time[0]);
+  const [time, setTime] = useState(timer);
+  const [lengthWord, setLengthWord] = useState(dataFuction[1].lengthWord[0]);
+  const [isRun, setIsRun] = useState(false);
+  const inputRef = useRef();
+  let timerId = useRef();
+  const [result, setResult] = useState(null);
 
   useEffect(() => {
     inputRef.current.focus();
   }, []);
 
   useEffect(() => {
-    fetchWords(dataWords.words, lengthwords);
-  }, [lengthwords]);
+    fetchWords(dataWords.words, currentFunction.lengthWord ? lengthWord : 200);
+  }, [lengthWord]);
 
   useEffect(() => {
-    if (currentFunction.time) {
-      if (isActive && time > 0) {
-        const interval = setInterval(() => setTime((prev) => prev - 1), 1000);
-        return () => clearInterval(interval);
-      } else if (time === 0) {
-        const wpm = (wordCorrect / (selected.time / 60)).toFixed(2);
-        setResult(wpm);
-
-        setIsActive(false);
-      }
-    } else if (currentFunction.countWord) {
-      console.log(time);
-      
-      if (isActive) {
-        const interval = setInterval(() => setTime((prev) => prev + 1), 1000);
-        return () => clearInterval(interval);
-      } else if (pos === words.length) {
-        const wpm = (wordCorrect / (time / 60)).toFixed(2);
-        setResult(wpm);
-        setIsActive(false);
-      }
-    }
-  }, [isActive, time, pos]);
-
-  useEffect(() => {
-    if (input.includes(" ")) {
+    if (valueInput.includes(" ")) {
       setWords((prevWords) => {
         const updateWords = prevWords.map((word, index) =>
           index === pos
             ? {
                 ...word,
-                class: word.text === input.trim() ? "correct" : "incorrect",
+                class:
+                  word.text === valueInput.trim() ? "correct" : "incorrect",
               }
             : word
         );
         if (updateWords[pos].class === "correct") {
           setWordCorrect((prev) => prev + 1);
         }
+
         return updateWords;
       });
-
-      setInput("");
+      setValueInput("");
       setPos((prev) => prev + 1);
     } else {
       setWords((prevWords) =>
@@ -86,17 +59,18 @@ function Home() {
           index === pos
             ? {
                 ...word,
-                class: word.text.includes(input.trim())
+                class: word.text.includes(valueInput.trim())
                   ? "highlight"
-                  : "highlighIncorrect",
+                  : "highlightIncorrect",
               }
             : word
         )
       );
     }
-  }, [input, pos]);
+  }, [valueInput, pos]);
 
   useEffect(() => {
+    fetchWords(dataWords.words, currentFunction.lengthWord ? lengthWord : 200);
     setWords((prevWords) =>
       prevWords.map((word, index) =>
         index === 0
@@ -107,193 +81,182 @@ function Home() {
           : word
       )
     );
-  }, [currentFunction, selected.time, selected.countWord]);
+  }, [currentFunction, timer, lengthWord]);
+
+  useEffect(() => {
+    if (isRun) {
+      if (currentFunction.time) {
+        if (time > 0) {
+          timerId.current = setTimeout(() => setTime((prev) => prev - 1), 1000);
+        } else if (time === 0) {
+          clearInterval(timerId.current);
+          const wpm = (wordCorrect / (timer / 60)).toFixed(2);
+          setResult(wpm);
+          setIsRun(false);
+        }
+      } else if (currentFunction.lengthWord) {
+        if (pos < lengthWord) {
+          timerId.current = setTimeout(() => setTime((prev) => prev + 1), 1000);
+        } else if (pos === lengthWord) {
+          clearInterval(timerId.current);
+          const wpm = (wordCorrect / (time / 60)).toFixed(2);
+          setResult(wpm);
+          setIsRun(false);
+        }
+      }
+    }
+  }, [isRun, time]);
+
+  useEffect(() => {
+    setTime(timer);
+  }, [timer]);
 
   const fetchWords = (data, num) => {
-    const listWord = Array.from({ length: num }, () => {
+    let listWord = Array.from({ length: num }, () => {
       const randomWord = data[Math.floor(Math.random() * data.length)].text;
       return randomWord.split(" ").map((word) => ({
         class: "",
         text: word.trim(),
       }));
     }).flat();
+
+    listWord = listWord.slice(0, num);
+
     setWords(listWord);
   };
 
-  const handleChangeInput = (e) => {
+  const handelInputChange = (e) => {
     const value = e.target.value;
     if (!value.startsWith(" ")) {
-      setInput(value);
-      setIsActive(true);
+      setValueInput(value);
+      setIsRun(true);
     }
   };
 
   const handleReload = () => {
-    fetchWords(dataWords.words, lengthwords);
-    setInput("");
-    setPos(0);
-    setResult(null);
-    setWordCorrect(0);
-    setIsActive(false);
-    setTime(selected.time);
-    inputRef.current.focus();
-  };
-
-  const onClickMode = (item) => {
-    setResult(null);
-    setInput("");
-    const newFunction = dataFuction.find((func) => func.mode === item.mode);
-    setCurrentFunction(newFunction);
-    setSelected((prev) => ({
-      ...prev,
-      mode: item.mode,
-      type: null,
-    }));
-    if (item.time) {
-      setTime(selected.time);
-      setLengthWords(30);
-    } else if (item.countWord) {
+    if (currentFunction.time) {
+      setTime(timer);
+    } else if (currentFunction.lengthWord) {
       setTime(0);
-      setLengthWords(selected.countWord);
     }
+    fetchWords(dataWords.words, currentFunction.lengthWord ? lengthWord : 200);
+    setWords((prevWords) =>
+      prevWords.map((word, index) =>
+        index === 0
+          ? {
+              ...word,
+              class: "highlight",
+            }
+          : word
+      )
+    );
+    setValueInput("");
+    setPos(0);
+    inputRef.current.focus();
+    setResult(0);
+    setIsRun(false);
+    setWordCorrect(0);
   };
 
-  const onClickTime = (item) => {
+  const handleLevelChange = (item) => {};
+
+  const handleModeChange = useCallback((currentData) => {
     handleReload();
-    setSelected((prev) => ({ ...prev, time: item }));
-    setTime(item);
-  };
+    setCurrentFunction(
+      dataFuction.find((data) => data.mode === currentData.mode)
+    );
+    if (currentData.time) {
+      setTime(timer);
+    } else if (currentData.lengthWord) {
+      setTime(0);
+    }
+  });
 
-  const onClickCountWord = (item) => {
+  const handleTypeChange = useCallback((item) => {
     handleReload();
-    setSelected((prev) => ({ ...prev, countWord: item }));
-    setLengthWords(item);
-  };
-
-  const onClickChange = (item) => {
-    // handleReload();
-    setSelected((prev) => ({
-      ...prev,
-      type: prev.type === item.data ? null : item.data,
-    }));
-  };
+    if (currentFunction.time) {
+      setTimer(item);
+    } else if (currentFunction.lengthWord) {
+      setLengthWord(item);
+    }
+  });
 
   return (
     <div className={cx("wrapper")}>
-      <div className={cx("function-bar")}>
-        <div className={cx("function-bar-item", "type")}>
-          {currentFunction.type.map((item, index) => (
-            <Button
-              key={index}
-              typeText
-              leftIcon={<FontAwesomeIcon icon={item.icon} />}
-              className={cx({ selected: item.data === selected.type })}
-              onClick={() => onClickChange(item)}
-            >
-              {item.data}
-            </Button>
-          ))}
-        </div>
-        <div className={cx("function-bar-item", "mode")}>
-          {dataFuction.map((item, index) => (
-            <Button
-              typeText
-              key={index}
-              leftIcon={<FontAwesomeIcon icon={item.icon} />}
-              className={cx({ selected: item.mode === selected.mode })}
-              onClick={() => {
-                onClickMode(item);
-              }}
-            >
-              {item.mode}
-            </Button>
-          ))}
-        </div>
-        <div className={cx("function-bar-item", "time")}>
-          {currentFunction.time &&
-            currentFunction.time.map((item, index) => (
-              <Button
-                key={index}
-                typeText
-                className={cx({ selected: item === selected.time })}
-                onClick={() => onClickTime(item)}
-              >
-                {item}
-              </Button>
-            ))}
-          {currentFunction.countWord &&
-            currentFunction.countWord.map((item, index) => (
-              <Button
-                key={index}
-                typeText
-                className={cx({ selected: item === selected.countWord })}
-                onClick={() => onClickCountWord(item)}
-              >
-                {item}
-              </Button>
-            ))}
-        </div>
+      <div className={cx("header-bar")}>
+        <FunctionBar
+          data={currentFunction}
+          time={timer}
+          lengthWord={lengthWord}
+          onModeChange={handleModeChange}
+          onTypeChange={handleTypeChange}
+          onLevelChange={handleLevelChange}
+        />
       </div>
-
-      <div className={cx("content")}>
-        {(result && (
-          <div className={cx("result-wraper")}>
-            <div>
-              <div className={cx("title-wpm")}>wpm</div>
-              <p>{result}</p>
+      {(result && (
+        <div className={cx("result-wrapper")}>
+          <div className={cx("main-result")}>
+            <div className={cx("result")}>
+              <p>Wpm</p> {result}
             </div>
-            <div>
-              <div>độ chính xác: 100%</div>
-              <p>từ đúng: {wordCorrect}</p>
-              <p>từ sai: {pos - wordCorrect}</p>
+            <div className={cx("ratio-correct")}>
+              <p>Tỷ lệ chính xác: </p> {(wordCorrect / pos) * 100 || 100}%
             </div>
-            <div>
-              <div>thời gian: {selected.time}</div>
-            </div>
-            <Button
-              leftIcon={
-                <FontAwesomeIcon
-                  icon={faAngleRight}
-                  onClick={() => {
-                    handleReload();
-                  }}
-                />
-              }
-            ></Button>
           </div>
-        )) || (
-          <>
-            <div className={cx("timer")}>
-              <span>{currentFunction.time && time}</span>
-              <span>
-                {currentFunction.countWord && pos + "/" + words.length}
-              </span>
+          <div className={cx("other-result")}>
+            <div className={cx("words-correct")}>
+              <p>Số từ đúng: </p> {wordCorrect || 10}
             </div>
-            <div className={cx("words-wrapper")}>
+            <div className={cx("words-incorrect")}>
+              <p>Số từ sai: </p> {pos - wordCorrect || 1}
+            </div>
+            <div className={cx("time-enter")}>
+              <p>Thời gian: </p>
+              {currentFunction.lengthWord ? time : timer}
+            </div>
+            <div className={cx("btn-wrapper")}>
+              <Button
+                typeIcon
+                className={"btn-restart"}
+                leftIcon={
+                  <FontAwesomeIcon icon={faRotateLeft} onClick={handleReload} />
+                }
+              ></Button>
+            </div>
+          </div>
+        </div>
+      )) || (
+        <>
+          <div className={cx("timer")}>
+            <span>
+              {currentFunction.time ? time : pos + " / " + lengthWord}
+            </span>
+          </div>
+          <div className={cx("content-wrapper")}>
+            <div className={cx("words")}>
               {words.map((item, index) => (
-                <div key={index} className={cx("word", item.class)}>
+                <span key={index} className={cx("word", item.class)}>
                   {item.text}
-                </div>
+                </span>
               ))}
             </div>
-          </>
-        )}
-
-        <div className={cx("input-wrapper", result && "hidden")}>
-          <input
-            ref={inputRef}
-            className={cx("input")}
-            type="text"
-            value={input}
-            onChange={handleChangeInput}
-          />
-          <Button
-            className={cx("btn-reload")}
-            leftIcon={<FontAwesomeIcon icon={faRotateRight} />}
-            typeIcon
-            onClick={handleReload}
-          ></Button>
-        </div>
+          </div>
+        </>
+      )}
+      <div className={cx("input-wrapper", { hiddenInput: result })}>
+        <input
+          ref={inputRef}
+          value={valueInput}
+          onChange={handelInputChange}
+          type="text"
+          className={cx("input")}
+        />
+        <Button
+          typeIcon
+          className={"btn-reload"}
+          leftIcon={<FontAwesomeIcon icon={faRotateLeft} />}
+          onClick={handleReload}
+        ></Button>
       </div>
     </div>
   );

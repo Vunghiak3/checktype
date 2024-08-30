@@ -9,6 +9,7 @@
   font-size: 1.8rem;
   cursor: pointer;
   background-color: transparent;
+  transition: all 0.05s linear;
 }
 
 .typeIcon {
@@ -27,14 +28,21 @@
   font-style: italic;
 }
 
-.typeText{
+.typeText {
   background-color: transparent;
   transition: all 0.05s linear;
   padding: 0 10px;
   color: var(--color-text);
   font-size: 1.4rem;
 
-  &:hover{
+  &:hover {
+    color: white;
+  }
+}
+
+.btn-restart {
+  color: #5ba1c7;
+  &:hover {
     color: white;
   }
 }
