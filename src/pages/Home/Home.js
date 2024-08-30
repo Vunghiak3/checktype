@@ -15,7 +15,9 @@ function Home() {
   const [currentFunction, setCurrentFunction] = useState(dataFuction[0]);
   const [words, setWords] = useState([]);
   const [pos, setPos] = useState(0);
+  console.log("🚀 ~ Home ~ pos:", pos)
   const [wordCorrect, setWordCorrect] = useState(0);
+  console.log("🚀 ~ Home ~ wordCorrect:", wordCorrect)
   const [valueInput, setValueInput] = useState("");
   const [timer, setTimer] = useState(dataFuction[0].time[0]);
   const [time, setTime] = useState(timer);
@@ -200,15 +202,15 @@ function Home() {
               <p>Wpm</p> {result}
             </div>
             <div className={cx("ratio-correct")}>
-              <p>Tỷ lệ chính xác: </p> {(wordCorrect / pos) * 100 || 100}%
+              <p>Tỷ lệ chính xác: </p> {(wordCorrect / pos) * 100 || 0}%
             </div>
           </div>
           <div className={cx("other-result")}>
             <div className={cx("words-correct")}>
-              <p>Số từ đúng: </p> {wordCorrect || 10}
+              <p>Số từ đúng: </p> {wordCorrect || 0}
             </div>
             <div className={cx("words-incorrect")}>
-              <p>Số từ sai: </p> {pos - wordCorrect || 1}
+              <p>Số từ sai: </p> {pos - wordCorrect || 0}
             </div>
             <div className={cx("time-enter")}>
               <p>Thời gian: </p>
